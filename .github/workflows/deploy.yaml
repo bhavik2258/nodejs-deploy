@@ -1,9 +1,9 @@
 
 name: Node.js Application Deployment
 
-
 on:
   workflow_dispatch:
+
   push:
     branches:
       - main
@@ -13,9 +13,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Step 2: Validate SSH secrets
+      - name: Validate SSH secrets
+        env:
+          DEPLOY_HOST: ${{ secrets.HOST }}
+          DEPLOY_KEY: ${{ secrets.KEY }}
+        run: |
+          if [ -z "$DEPLOY_HOST" ]; then
+            echo "ERROR: HOST secret is missing"
+            exit 1
+          fi
+
+          if [ -z "$DEPLOY_KEY" ]; then
+            echo "ERROR: KEY secret is missing"
+            exit 1
+          fi
+
+          echo "SSH secrets are configured successfully"
+
+      # Step 3: Deploy through SSH
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
@@ -23,7 +43,10 @@ jobs:
           username: root
           key: ${{ secrets.KEY }}
           port: 2222
+          timeout: 30s
+          command_timeout: 10m
           script: |
             cd /nodejs-deploy
             git pull origin main
             docker compose up -d --build
+
