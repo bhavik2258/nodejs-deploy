@@ -1,24 +1,26 @@
-name : node js application deployment 
+
+name: Node.js Application Deployment
 
 on:
   push:
-    braches:
+    branches:
       - main
 
 jobs:
   build:
-    runs-on:ubuntu-latest
+    runs-on: ubuntu-latest
+
     steps:
-     - name: checkout code
-       uses: actions/checkout@v2
-     - name: Deploy via ssh
-       uses: appleboy/shh-action@v0.1.5
-       with: 
-        host:${{secrets.HOST}}
-        username: root
-        key: ${{secrets.KEY}}
-        script: |
-          cd /nodejs-deploy
-          git pull
-          compose up -d --build
-          
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: root
+          key: ${{ secrets.KEY }}
+          script: |
+            cd /nodejs-deploy
+            git pull origin main
+            docker compose up -d --build
