@@ -20,6 +20,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: root
           key: ${{ secrets.KEY }}
+          port: 2222
           script: |
             cd /nodejs-deploy
             git pull origin main
